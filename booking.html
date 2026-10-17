@@ -77,9 +77,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
 import {
   getFirestore,
-  collection,
+    collection,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  query,
+  where,
+  orderBy,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -96,6 +100,62 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const $ = id => document.getElementById(id);
 
+async function loadBookingHistory() {
+  const list = $("historyList");
+  list.textContent = "Loading your bookings...";
+
+  const user = auth.currentUser;
+
+  if (!user) {
+    list.textContent = "Please login to view your bookings.";
+    return;
+  }
+
+  try {
+    const bookingsQuery = query(
+      collection(db, "bookings"),
+      where("uid", "==", user.uid)
+    );
+
+    const snapshot = await getDocs(bookingsQuery);
+
+    if (snapshot.empty) {
+      list.textContent = "No bookings found yet.";
+      return;
+    }
+
+    list.replaceChildren();
+
+    snapshot.forEach(docSnap => {
+      const booking = docSnap.data();
+
+      const card = document.createElement("div");
+      card.style.cssText =
+        "padding:14px;margin:12px 0;border:1px solid #c9a227;border-radius:8px;background:#111;";
+
+      const title = document.createElement("h3");
+      title.style.color = "#d4af37";
+      title.textContent = booking.service || "Photography Booking";
+
+      const details = document.createElement("p");
+      details.textContent =
+        "Date: " + (booking.date || booking.eventDate || "Not set") +
+        " | Status: " + (booking.status || "Pending");
+
+      const customer = document.createElement("p");
+      customer.textContent = "Name: " + (booking.name || booking.customer || "Customer");
+
+      card.append(title, details, customer);
+      list.appendChild(card);
+    });
+  } catch (error) {
+    console.error(error);
+    list.textContent = "Could not load bookings: " + error.message;
+  }
+}
+
+$("loadHistory").addEventListener("click", loadBookingHistory);
+  
 onAuthStateChanged(auth, user => {
   if (!user) {
     window.location.replace("./login.html");
@@ -178,5 +238,19 @@ $("bookingForm").addEventListener("submit", async event => {
   }
 });
  </script>
+  
+<section id="bookingHistory" style="margin:24px auto;padding:18px;max-width:900px;background:#171717;color:#fff;border:1px solid #c9a227;border-radius:12px;">
+  <h2 style="color:#d4af37;">My Booking History</h2>
+  <p>View your previous bookings and current status.</p>
+
+  <button id="loadHistory" type="button"
+    style="padding:10px 16px;background:#c9a227;color:#111;border:0;border-radius:6px;font-weight:bold;">
+    View My Bookings
+  </button>
+
+  <div id="historyList" style="margin-top:16px;">
+    Tap "View My Bookings" to see your bookings.
+  </div>
+</section>
 </body>
 </html>
