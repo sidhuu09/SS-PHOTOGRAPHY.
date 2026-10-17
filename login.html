@@ -141,9 +141,20 @@ onAuthStateChanged(auth, user => {
  }
 });
 
+
 $("nextBtn").onclick = () => {
- // Replace this with the actual next-page filename when it is created.
- window.location.href = "booking.html";
+  const user = auth.currentUser;
+
+  if (!user) {
+    status("Please login first.");
+    return;
+  }
+
+  if (user.uid === "3nv22eD6StTIMnRtIcz3Wu5zkHw2") {
+    window.location.href = "./admin.html";
+  } else {
+    window.location.href = "./booking.html";
+  }
 };
 
 $("logoutBtn").onclick = async () => {
