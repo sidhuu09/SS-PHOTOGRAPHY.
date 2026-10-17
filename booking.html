@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SS PHOTOGRAPHY | Customer Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
+header{background:#151515;border-bottom:2px solid #d4af37;padding:18px;text-align:center}
+h1,h2{color:#d4af37}
+main{max-width:850px;margin:25px auto;padding:16px}
+.card{background:#151515;border:1px solid #b8962e;border-radius:14px;padding:20px;margin-bottom:18px}
+button,a{display:inline-block;padding:12px 16px;border:0;border-radius:8px;background:#d4af37;color:#111;font-weight:bold;text-decoration:none;cursor:pointer}
+input,select,textarea{display:block;width:100%;padding:12px;margin:10px 0;background:#222;color:white;border:1px solid #555;border-radius:7px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.small{color:#bbb;font-size:14px}
+#status{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+<h1>📸 SS PHOTOGRAPHY</h1>
+<p>Customer Dashboard</p>
+</header>
+<main>
+<section class="card">
+<h2>Welcome</h2>
+<p id="customer">Checking login...</p>
+<p class="small">Choose a photography service to start your booking.</p>
+<button id="logout" type="button">Logout</button>
+</section>
+
+<section class="card">
+<h2>Our Services</h2>
+<div class="grid">
+<div><h3>Wedding Photography</h3><p class="small">Wedding and special moments.</p></div>
+<div><h3>Pre-Wedding Shoot</h3><p class="small">Couple photo sessions.</p></div>
+<div><h3>Birthday Photography</h3><p class="small">Birthday memories.</p></div>
+<div><h3>Event Photography</h3><p class="small">Events and celebrations.</p></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Booking Enquiry</h2>
+<form id="bookingForm">
+<input id="name" placeholder="Your Name" required>
+<input id="phone" type="tel" placeholder="Mobile Number" required>
+<select id="service" required>
+<option value="">Select Service</option>
+<option>Wedding Photography</option>
+<option>Pre-Wedding Shoot</option>
+<option>Birthday Photography</option>
+<option>Event Photography</option>
+</select>
+<input id="date" type="date" required>
+<textarea id="details" placeholder="Venue or other details"></textarea>
+<button type="submit">Send Booking Enquiry on WhatsApp</button>
+</form>
+<p class="small">This sends an enquiry through WhatsApp. Online booking storage and payment will be added in later steps.</p>
+<p id="status" role="status"></p>
+</section>
+
+<section class="card">
+<a href="./index.html">Back to Home</a>
+</section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyAqv-Xg_98S-ebQVLA2OaugVX0NA16rZ4c",
+ authDomain: "ss-photography-new.firebaseapp.com",
+ projectId: "ss-photography-new",
+ storageBucket: "ss-photography-new.firebasestorage.app",
+ messagingSenderId: "764601358812",
+ appId: "1:764601358812:web:1a76b0c2b6b0df3eb6d719"
+};
+
+const auth = getAuth(initializeApp(firebaseConfig));
+const $ = id => document.getElementById(id);
+
+onAuthStateChanged(auth, user => {
+ if (!user) {
+  window.location.replace("./login.html");
+  return;
+ }
+ $("customer").textContent = "Logged in as " + user.email;
+});
+
+$("logout").onclick = async () => {
+ await signOut(auth);
+ window.location.replace("./login.html");
+};
+
+$("bookingForm").addEventListener("submit", event => {
+ event.preventDefault();
+ const message = [
+  "SS PHOTOGRAPHY - Booking Enquiry",
+  "Name: " + $("name").value.trim(),
+  "Mobile: " + $("phone").value.trim(),
+  "Service: " + $("service").value,
+  "Date: " + $("date").value,
+  "Details: " + $("details").value.trim()
+ ].join("\n");
+ const whatsappNumber = "918144722094";
+ window.open("https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message), "_blank");
+ $("status").textContent = "WhatsApp is opening. Send the message there to complete your enquiry.";
+});
+</script>
+</body>
+</html>
