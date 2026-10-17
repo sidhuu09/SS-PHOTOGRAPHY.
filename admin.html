@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SS PHOTOGRAPHY | Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #090909;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    h1, h2 { color: #d4af37; }
+    .panel {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 18px;
+      background: #171717;
+      border: 1px solid #c9a227;
+      border-radius: 12px;
+    }
+    button, select {
+      padding: 10px;
+      margin: 5px 3px;
+      border-radius: 6px;
+      border: 1px solid #c9a227;
+      font-size: 14px;
+    }
+    button {
+      background: #d4af37;
+      color: #111;
+      font-weight: bold;
+    }
+    select { background: #222; color: white; }
+    .booking {
+      margin-top: 14px;
+      padding: 14px;
+      background: #101010;
+      border: 1px solid #555;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+    .muted { color: #bbb; }
+    #message { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header class="panel">
+    <h1>SS PHOTOGRAPHY</h1>
+    <h2>Admin Dashboard</h2>
+    <p id="adminInfo">Checking admin access...</p>
+    <button id="refreshBtn" type="button">Refresh Bookings</button>
+    <button id="logoutBtn" type="button">Logout</button>
+    <p id="message" role="status"></p>
+  </header>
+
+  <main class="panel">
+    <h2>Customer Bookings</h2>
+    <div id="bookingList">Loading...</div>
+  </main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqv-Xg_98S-ebQVLA2OaugVX0NA16rZ4c",
+  authDomain: "ss-photography-new.firebaseapp.com",
+  projectId: "ss-photography-new",
+  storageBucket: "ss-photography-new.firebasestorage.app",
+  messagingSenderId: "764601358812",
+  appId: "1:764601358812:web:1a76b0c2b6b0df3eb6d719"
+};
+
+const ADMIN_UID = "3nv22eD6StTIMnRtIcz3Wu5zkHw2";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+let currentAdmin = null;
+
+function showMessage(text) {
+  $("message").textContent = text;
+}
+
+function addText(parent, tag, text, color) {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  if (color) el.style.color = color;
+  parent.appendChild(el);
+  return el;
+}
+
+async function loadBookings() {
+  if (!currentAdmin || currentAdmin.uid !== ADMIN_UID) return;
+
+  $("bookingList").textContent = "Loading bookings...";
+  showMessage("");
+
+  try {
+    const snapshot = await getDocs(collection(db, "bookings"));
+    const list = $("bookingList");
+    list.replaceChildren();
+
+    if (snapshot.empty) {
+      list.textContent = "No bookings found.";
+      return;
+    }
+
+    snapshot.forEach(bookingDoc => {
+      const b = bookingDoc.data();
+      const card = document.createElement("article");
+      card.className = "booking";
+
+      addText(card, "h3", b.name || b.customer || "Customer");
+      addText(card, "p", "Mobile: " + (b.phone || b.mobile || "Not provided"));
+      addText(card, "p", "Service: " + (b.service || "Not provided"));
+      addText(card, "p", "Event Date: " + (b.date || b.eventDate || "Not provided"));
+      addText(card, "p", "Details: " + (b.details || "None"));
+      addText(card, "p", "Current Status: " + (b.status || "Pending"), "#d4af37");
+
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", "Update booking status");
+      ["Pending", "Confirmed", "Completed", "Cancelled"].forEach(status => {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = status;
+        if ((b.status || "Pending") === status) option.selected = true;
+        select.appendChild(option);
+      });
+
+      const updateButton = document.createElement("button");
+      updateButton.type = "button";
+      updateButton.textContent = "Update Status";
+
+      updateButton.addEventListener("click", async () => {
+        if (!currentAdmin || currentAdmin.uid !== ADMIN_UID) {
+          showMessage("Admin access required.");
+          return;
+        }
+
+        updateButton.disabled = true;
+        try {
+          await updateDoc(doc(db, "bookings", bookingDoc.id), {
+            status: select.value
+          });
+          showMessage("Status updated successfully.");
+          await loadBookings();
+        } catch (error) {
+          console.error(error);
+          showMessage("Status update failed: " + error.message);
+          updateButton.disabled = false;
+        }
+      });
+
+      card.append(select, updateButton);
+      list.appendChild(card);
+    });
+  } catch (error) {
+    console.error(error);
+    $("bookingList").textContent =
+      "Could not load bookings. Check Firestore rules and internet connection.";
+    showMessage(error.message);
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.replace("./login.html");
+    return;
+  }
+
+  if (user.uid !== ADMIN_UID) {
+    $("adminInfo").textContent = "Access denied. Admin account required.";
+    $("bookingList").textContent = "You do not have permission to view bookings.";
+    $("refreshBtn").disabled = true;
+    return;
+  }
+
+  currentAdmin = user;
+  $("adminInfo").textContent = "Admin logged in: " + (user.email || "Admin");
+  loadBookings();
+});
+
+$("refreshBtn").addEventListener("click", loadBookings);
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.replace("./login.html");
+});
+</script>
+</body>
+</html>
