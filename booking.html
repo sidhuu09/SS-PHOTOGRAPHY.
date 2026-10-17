@@ -167,7 +167,15 @@ function showPaymentReceipt(booking) {
     </head>
     <body>
       <div class="receipt">
-        <h2>SS PHOTOGRAPHY</h2>
+        <div style="text-align:center;">
+  <img
+    src="./logo.png"
+    alt="SS PHOTOGRAPHY Logo"
+    style="width:100px;height:100px;object-fit:contain;"
+    onerror="this.style.display='none';"
+  >
+  <h2>SS PHOTOGRAPHY</h2>
+</div>
         <p style="text-align:center">PAYMENT RECEIPT</p>
         <hr>
         <p><b>Booking ID:</b> ${safe(booking.id || "N/A")}</p>
