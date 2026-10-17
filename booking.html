@@ -67,49 +67,116 @@ input,select,textarea{display:block;width:100%;padding:12px;margin:10px 0;backgr
 </section>
 </main>
 
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyAqv-Xg_98S-ebQVLA2OaugVX0NA16rZ4c",
- authDomain: "ss-photography-new.firebaseapp.com",
- projectId: "ss-photography-new",
- storageBucket: "ss-photography-new.firebasestorage.app",
- messagingSenderId: "764601358812",
- appId: "1:764601358812:web:1a76b0c2b6b0df3eb6d719"
+  apiKey: "AIzaSyAqv-Xg_98S-ebQVLA2OaugVX0NA16rZ4c",
+  authDomain: "ss-photography-new.firebaseapp.com",
+  projectId: "ss-photography-new",
+  storageBucket: "ss-photography-new.firebasestorage.app",
+  messagingSenderId: "764601358812",
+  appId: "1:764601358812:web:1a76b0c2b6b0df3eb6d719"
 };
 
-const auth = getAuth(initializeApp(firebaseConfig));
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 const $ = id => document.getElementById(id);
 
 onAuthStateChanged(auth, user => {
- if (!user) {
-  window.location.replace("./login.html");
-  return;
- }
- $("customer").textContent = "Logged in as " + user.email;
+  if (!user) {
+    window.location.replace("./login.html");
+    return;
+  }
+
+  $("customer").textContent = "Logged in as " + user.email;
 });
 
 $("logout").onclick = async () => {
- await signOut(auth);
- window.location.replace("./login.html");
+  await signOut(auth);
+  window.location.replace("./login.html");
 };
 
-$("bookingForm").addEventListener("submit", event => {
- event.preventDefault();
- const message = [
-  "SS PHOTOGRAPHY - Booking Enquiry",
-  "Name: " + $("name").value.trim(),
-  "Mobile: " + $("phone").value.trim(),
-  "Service: " + $("service").value,
-  "Date: " + $("date").value,
-  "Details: " + $("details").value.trim()
- ].join("\n");
- const whatsappNumber = "918144722094";
- window.open("https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message), "_blank");
- $("status").textContent = "WhatsApp is opening. Send the message there to complete your enquiry.";
+$("bookingForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const button = $("bookingForm").querySelector('[type="submit"]');
+  const status = $("status");
+  const user = auth.currentUser;
+
+  if (!user) {
+    status.textContent = "Please login before booking.";
+    window.location.replace("./login.html");
+    return;
+  }
+
+  const name = $("name").value.trim();
+  const phone = $("phone").value.trim();
+  const service = $("service").value;
+  const date = $("date").value;
+  const details = $("details").value.trim();
+
+  if (!name || !phone || !service || !date) {
+    status.textContent = "Please fill all required fields.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "Saving your booking...";
+
+  try {
+    await addDoc(collection(db, "bookings"), {
+      uid: user.uid,
+      name,
+      phone,
+      service,
+      date,
+      details,
+      status: "Pending",
+      createdAt: serverTimestamp()
+    });
+
+    status.textContent =
+      "Booking saved successfully! Opening WhatsApp...";
+
+    const message = [
+      "SS PHOTOGRAPHY - Booking Enquiry",
+      "Name: " + name,
+      "Mobile: " + phone,
+      "Service: " + service,
+      "Date: " + date,
+      "Details: " + details,
+      "Status: Pending"
+    ].join("\n");
+
+    const whatsappNumber = "918144722094";
+    window.open(
+      "https://wa.me/" + whatsappNumber +
+      "?text=" + encodeURIComponent(message),
+      "_blank"
+    );
+
+  } catch (error) {
+    console.error(error);
+    status.textContent =
+      "Booking save failed: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
 });
-</script>
+ </script>
 </body>
 </html>
