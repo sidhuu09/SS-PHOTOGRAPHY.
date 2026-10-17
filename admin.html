@@ -127,9 +127,8 @@ async function loadBookings() {
 const bookingDocs = [...snapshot.docs].sort((a, b) => {
   const timeA = a.data().createdAt?.toMillis?.() ?? 0;
   const timeB = b.data().createdAt?.toMillis?.() ?? 0;
-  return timeA - timeB;
+  return timeB - timeA;
 });
-
 bookingDocs.forEach((bookingDoc, index) => {
   const b = bookingDoc.data();
   const card = document.createElement("article");
