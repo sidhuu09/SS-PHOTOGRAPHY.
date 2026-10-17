@@ -100,6 +100,97 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const $ = id => document.getElementById(id);
 
+function escapeReceiptText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function showPaymentReceipt(booking) {
+  const total = Number(
+    booking.totalAmount ?? booking.totalPrice ?? booking.total ?? 0
+  );
+  const advance = Number(
+    booking.advancePayment ?? booking.advanceAmount ?? booking.advance ?? 0
+  );
+  const balance = Math.max(0, total - advance);
+
+  const receiptWindow = window.open("", "_blank");
+
+  if (!receiptWindow) {
+    alert("Please allow pop-ups to view the receipt.");
+    return;
+  }
+
+  const safe = escapeReceiptText;
+
+  receiptWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>SS PHOTOGRAPHY - Payment Receipt</title>
+      <style>
+        body {
+          background:#f5f5f5;
+          color:#222;
+          font-family:Arial,sans-serif;
+          padding:20px;
+        }
+        .receipt {
+          max-width:550px;
+          margin:auto;
+          background:white;
+          border:2px solid #c9a227;
+          padding:22px;
+          border-radius:10px;
+        }
+        h2 { color:#9b7812;text-align:center; }
+        hr { border:1px solid #c9a227; }
+        p { line-height:1.7;overflow-wrap:anywhere; }
+        .amount { font-size:18px;font-weight:bold; }
+        button {
+          padding:12px 18px;background:#c9a227;
+          border:0;border-radius:6px;font-weight:bold;
+          margin:12px 5px 0 0;
+        }
+        @media print {
+          button { display:none; }
+          body { background:white;padding:0; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt">
+        <h2>SS PHOTOGRAPHY</h2>
+        <p style="text-align:center">PAYMENT RECEIPT</p>
+        <hr>
+        <p><b>Booking ID:</b> ${safe(booking.id || "N/A")}</p>
+        <p><b>Customer:</b> ${safe(booking.name || booking.customer || "Customer")}</p>
+        <p><b>Service:</b> ${safe(booking.service || "Photography")}</p>
+        <p><b>Event Date:</b> ${safe(booking.date || booking.eventDate || "Not set")}</p>
+        <p><b>Booking Status:</b> ${safe(booking.status || "Pending")}</p>
+        <hr>
+        <p class="amount">Total Amount: ₹${total.toLocaleString("en-IN")}</p>
+        <p class="amount">Advance Paid: ₹${advance.toLocaleString("en-IN")}</p>
+        <p class="amount">Balance Due: ₹${balance.toLocaleString("en-IN")}</p>
+        <hr>
+        <p>Note: This receipt displays the amounts recorded in the booking system. It is not independent proof of payment.</p>
+        <button onclick="window.print()">Print / Save as PDF</button>
+        <button onclick="window.close()">Close</button>
+      </div>
+    </body>
+    </html>
+  `);
+
+  receiptWindow.document.close();
+          }
+  
 async function loadBookingHistory() {
   const list = $("historyList");
   list.textContent = "Loading your bookings...";
@@ -138,15 +229,43 @@ async function loadBookingHistory() {
       title.textContent = booking.service || "Photography Booking";
 
       const details = document.createElement("p");
+      const customer = document.createElement("p");
+customer.textContent =
+  "Name: " + (booking.name || booking.customer || "Customer");
       details.textContent =
         "Date: " + (booking.date || booking.eventDate || "Not set") +
         " | Status: " + (booking.status || "Pending");
 
-      const customer = document.createElement("p");
-      customer.textContent = "Name: " + (booking.name || booking.customer || "Customer");
+      const payment = document.createElement("p");
 
-      card.append(title, details, customer);
-      list.appendChild(card);
+const total = Number(
+  booking.totalAmount ?? booking.totalPrice ?? booking.total ?? 0
+);
+
+const advance = Number(
+  booking.advancePayment ?? booking.advanceAmount ?? booking.advance ?? 0
+);
+
+const balance = Math.max(0, total - advance);
+
+payment.textContent =
+  "Total: ₹" + total.toLocaleString("en-IN") +
+  " | Advance: ₹" + advance.toLocaleString("en-IN") +
+  " | Balance Due: ₹" + balance.toLocaleString("en-IN");
+
+const receiptButton = document.createElement("button");
+receiptButton.type = "button";
+receiptButton.textContent = "View Payment Receipt";
+
+receiptButton.addEventListener("click", () => {
+  showPaymentReceipt({
+    ...booking,
+    id: docSnap.id
+  });
+});
+
+card.append(title, details, customer, payment, receiptButton);
+list.appendChild(card);
     });
   } catch (error) {
     console.error(error);
