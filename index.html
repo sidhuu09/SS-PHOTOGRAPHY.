@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SS PHOTOGRAPHY</title>
+  <meta name="description" content="SS PHOTOGRAPHY - Wedding, Pre-Wedding, Birthday and Event Photography.">
+  <style>
+    :root {
+      --gold: #d4af37;
+      --black: #0b0b0b;
+      --card: #171717;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+    header {
+      padding: 16px 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #4b3b14;
+      background: #090909;
+    }
+    .logo { color: var(--gold); font-size: 22px; font-weight: 800; }
+    nav { display: flex; gap: 14px; flex-wrap: wrap; }
+    nav a:hover { color: var(--gold); }
+    .hero {
+      min-height: 440px;
+      padding: 70px 6%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      background:
+        linear-gradient(#000b, #000c),
+        url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=85") center/cover;
+    }
+    .hero h1 { font-size: clamp(34px, 7vw, 62px); margin: 0; color: var(--gold); }
+    .hero p { max-width: 650px; margin: 15px auto 25px; }
+    .btn {
+      display: inline-block;
+      background: var(--gold);
+      color: #111;
+      font-weight: bold;
+      padding: 12px 20px;
+      border-radius: 5px;
+      margin: 5px;
+    }
+    section { padding: 48px 6%; }
+    h2 { color: var(--gold); text-align: center; margin: 0 0 25px; }
+    .about { max-width: 800px; margin: auto; text-align: center; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid #3e3215;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .card h3 { color: var(--gold); margin: 14px 14px 5px; }
+    .card p { margin: 0 14px 18px; color: #ddd; }
+    .contact { text-align: center; background: #121212; }
+    footer { text-align: center; padding: 20px; color: #bbb; border-top: 1px solid #4b3b14; }
+    .whatsapp {
+      position: fixed; right: 18px; bottom: 18px; z-index: 10;
+      background: #25d366; color: #071b0e;
+      border-radius: 30px; padding: 12px 16px; font-weight: bold;
+      box-shadow: 0 3px 14px #0008;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="#home">📸 SS PHOTOGRAPHY</a>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div>
+        <h1>SS PHOTOGRAPHY</h1>
+        <p>Capturing your beautiful moments forever — Wedding, Pre-Wedding, Birthday and Event Photography.</p>
+        <a class="btn" href="#services">Explore Services</a>
+        <a class="btn" href="#contact">Contact Us</a>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>About Us</h2>
+      <div class="about">
+        <p>Welcome to SS PHOTOGRAPHY. We capture your special moments with creativity, care and professional photography services. Every moment tells a story, and we help you keep it forever.</p>
+      </div>
+    </section>
+
+    <section id="services">
+      <h2>Our Services</h2>
+      <div class="grid">
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80" alt="Wedding photography">
+          <h3>Wedding Photography</h3><p>Beautiful memories from your special day.</p>
+        </article>
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=700&q=80" alt="Pre-wedding photography">
+          <h3>Pre-Wedding Shoot</h3><p>Creative photos celebrating your story.</p>
+        </article>
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=700&q=80" alt="Birthday event">
+          <h3>Birthday Photography</h3><p>Save every smile and celebration.</p>
+        </article>
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80" alt="Event photography">
+          <h3>Event Photography</h3><p>Professional coverage for special events.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <h2>Photo Gallery</h2>
+      <div class="grid">
+        <div class="card"><img src="https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=700&q=80" alt="Wedding moments"></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80" alt="Photography event"></div>
+        <div class="card"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80" alt="Wedding celebration"></div>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <h2>Contact Us</h2>
+      <p>📍 Dakuluguda</p>
+      <p>📞 <a href="tel:8144722094">8144722094</a> / <a href="tel:7609997113">7609997113</a></p>
+      <a class="btn" href="https://wa.me/918144722094?text=Hello%20SS%20PHOTOGRAPHY%2C%20I%20want%20to%20know%20about%20your%20services." target="_blank" rel="noopener">Chat on WhatsApp</a>
+    </section>
+  </main>
+
+  <footer>© <span id="year"></span> SS PHOTOGRAPHY. All rights reserved.</footer>
+  <a class="whatsapp" href="https://wa.me/918144722094?text=Hello%20SS%20PHOTOGRAPHY" target="_blank" rel="noopener">WhatsApp</a>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+                            </html>
+                            
