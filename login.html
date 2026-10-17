@@ -100,10 +100,18 @@ $("authForm").addEventListener("submit", async event => {
    const result = await createUserWithEmailAndPassword(auth, email, password);
    if (name) await updateProfile(result.user, { displayName: name });
    status("Account created successfully!");
-  } else {
-   await signInWithEmailAndPassword(auth, email, password);
+
+} else {
+   const result = await signInWithEmailAndPassword(auth, email, password);
    status("Login successful!");
+
+   if (result.user.uid === "3nv22eD6StTIMnRtIcz3Wu5zkHw2") {
+     window.location.href = "./admin.html";
+   } else {
+     window.location.href = "./booking.html";
+   }
   }
+  
  } catch (error) {
   const messages = {
    "auth/email-already-in-use": "This email is already registered. Please login.",
